@@ -1,134 +1,498 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>PT Win Arena – Ludo</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-  body{
-    margin:0; font-family:Arial,Helvetica,sans-serif;
-    background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-    color:#fff; text-align:center;
-  }
-  .wrap{max-width:420px;margin:0 auto;padding:16px}
-  h1{margin:10px 0}
-  .board{
-    background:#0b1c24;border-radius:16px;padding:16px;
-    box-shadow:0 10px 30px rgba(0,0,0,.4);
-  }
-  .row{display:flex;justify-content:space-between;align-items:center;margin:10px 0}
-  .pill{background:#122a36;padding:10px 14px;border-radius:999px}
-  .token{
-    width:22px;height:22px;border-radius:50%;
-    display:inline-block;margin-left:6px
-  }
-  .me{background:#00e676}
-  .ai{background:#ff5252}
-  .dice{
-    font-size:36px; margin:14px 0; min-height:42px
-  }
-  .btn{
-    background:#00e676;color:#000;border:none;border-radius:12px;
-    padding:14px 22px;font-weight:700;font-size:16px;cursor:pointer
-  }
-  .btn:disabled{opacity:.5}
-  .track{
-    background:#0e2430;border-radius:12px;padding:12px;margin-top:12px
-  }
-  .bar{
-    height:10px;border-radius:999px;background:#1a3a4a;overflow:hidden
-  }
-  .fill{height:100%}
-  .fill.me{background:#00e676}
-  .fill.ai{background:#ff5252}
-  .msg{min-height:40px;margin-top:10px}
-  .footer{font-size:12px;opacity:.8;margin-top:8px}
+*{box-sizing:border-box}
+body{
+  margin:0; font-family:Arial,Helvetica,sans-serif;
+  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  color:#fff; overflow:hidden;
+}
+.center{
+  display:flex; align-items:center; justify-content:center; flex-direction:column;
+}
+.hidden{display:none}
+
+/* LOADING */
+#loading{
+  position:fixed; inset:0; background:#0b1c24;
+}
+.loader{
+  width:64px;height:64px;border-radius:50%;
+  border:6px solid #1e3a44;border-top-color:#00e676;
+  animation:spin 1s linear infinite; margin-bottom:14px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* MAIN */
+#main{min-height:100vh}
+.card{
+  background:#0b1c24; border-radius:16px; padding:20px;
+  box-shadow:0 12px 30px rgba(0,0,0,.35);
+  max-width:420px; width:92%;
+  animation:pop .4s ease;
+}
+@keyframes pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+h1{margin:0 0 8px}
+.sub{opacity:.85;font-size:13px;margin-bottom:16px}
+.btn{
+  width:100%; padding:14px; margin:8px 0;
+  border:none; border-radius:12px; cursor:pointer;
+  font-size:16px; font-weight:700;
+}
+.friend{background:#00e676;color:#000}
+.ai{background:#29b6f6;color:#000}
+.toggle{
+  margin-top:10px; display:flex; gap:10px; justify-content:center; font-size:12px; opacity:.85
+}
+.small{font-size:12px; opacity:.8; margin-top:10px}
 </style>
 </head>
 
 <body>
-<div class="wrap">
-  <h1>🎲 PT Win Arena – Ludo</h1>
-  <div class="board">
-    <div class="row">
-      <div class="pill">YOU <span class="token me"></span></div>
-      <div class="pill">COMPUTER <span class="token ai"></span></div>
-    </div>
 
-    <div class="dice" id="dice">🎲</div>
-    <button class="btn" id="rollBtn" onclick="roll()">ROLL DICE</button>
-
-    <div class="track">
-      <div class="row">
-        <div>YOU: <b><span id="mePos">0</span>/100</b></div>
-        <div>AI: <b><span id="aiPos">0</span>/100</b></div>
-      </div>
-      <div class="bar"><div class="fill me" id="meBar" style="width:0%"></div></div>
-      <div style="height:8px"></div>
-      <div class="bar"><div class="fill ai" id="aiBar" style="width:0%"></div></div>
-    </div>
-
-    <div class="msg" id="msg">Your turn. Roll the dice!</div>
-  </div>
-  <div class="footer">Single-player vs Computer • Just for fun</div>
+<!-- LOADING SCREEN -->
+<div id="loading" class="center">
+  <div class="loader"></div>
+  <div style="font-weight:700">PT Win Arena</div>
+  <div style="opacity:.8;font-size:12px">Loading…</div>
 </div>
 
-<!-- Sounds -->
-<audio id="rollSfx" src="https://assets.mixkit.co/sfx/preview/mixkit-game-dice-roll-2003.mp3"></audio>
-<audio id="winSfx" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3"></audio>
+<!-- MAIN SCREEN -->
+<div id="main" class="center hidden">
+  <div class="card center">
+    <h1>🎲 PT Win Arena</h1>
+    <div class="sub">Choose how you want to play</div>
+
+    <button class="btn friend" onclick="selectMode('friend')">
+      👥 Play with Friend (Pass & Play)
+    </button>
+
+    <button class="btn ai" onclick="selectMode('ai')">
+      🤖 Play with Computer
+    </button>
+
+    <div class="toggle">
+      <span>🎵 Music:</span>
+      <button onclick="toggleMusic()" style="padding:6px 10px;border-radius:8px;border:none;cursor:pointer">ON/OFF</button>
+    </div>
+
+    <div class="small">Single device • Offline fun</div>
+  </div>
+</div>
+
+<!-- AUDIO -->
+<audio id="bgm" loop>
+  <source src="https://assets.mixkit.co/music/preview/mixkit-arcade-retro-game-over-213.mp3">
+</audio>
 
 <script>
-let me=0, ai=0, turn="me";
-const diceEl=document.getElementById('dice');
-const msg=document.getElementById('msg');
-const btn=document.getElementById('rollBtn');
-const mePos=document.getElementById('mePos');
-const aiPos=document.getElementById('aiPos');
-const meBar=document.getElementById('meBar');
-const aiBar=document.getElementById('aiBar');
-const rollSfx=document.getElementById('rollSfx');
-const winSfx=document.getElementById('winSfx');
+const loading=document.getElementById('loading');
+const main=document.getElementById('main');
+const bgm=document.getElementById('bgm');
+let musicOn=true;
 
-function rand(){return Math.floor(Math.random()*6)+1}
-function setBars(){
-  mePos.textContent=me; aiPos.textContent=ai;
-  meBar.style.width=Math.min(me,100)+'%';
-  aiBar.style.width=Math.min(ai,100)+'%';
-}
-function end(who){
-  winSfx.play();
-  btn.disabled=true;
-  msg.innerHTML = who==="me" ? "🎉 You WIN!" : "🤖 Computer wins!";
-}
-function roll(){
-  if(btn.disabled) return;
-  btn.disabled=true;
-  rollSfx.currentTime=0; rollSfx.play();
-  const d=rand();
-  diceEl.textContent = ["⚀","⚁","⚂","⚃","⚄","⚅"][d-1];
+// Loading -> Main
+setTimeout(()=>{
+  loading.classList.add('hidden');
+  main.classList.remove('hidden');
+  bgm.volume=0.4;
+  bgm.play().catch(()=>{});
+},2500);
 
-  setTimeout(()=>{
-    if(turn==="me"){
-      me = Math.min(100, me + d);
-      setBars();
-      if(me>=100) return end("me");
-      turn="ai";
-      msg.textContent="Computer thinking…";
-      setTimeout(aiTurn,700);
-    }
-  },400);
+// Music toggle
+function toggleMusic(){
+  musicOn=!musicOn;
+  if(musicOn){ bgm.play().catch(()=>{}); }
+  else{ bgm.pause(); }
 }
-function aiTurn(){
-  const d=rand();
-  diceEl.textContent = ["⚀","⚁","⚂","⚃","⚄","⚅"][d-1];
-  ai = Math.min(100, ai + d);
-  setBars();
-  if(ai>=100) return end("ai");
-  turn="me";
-  msg.textContent="Your turn. Roll the dice!";
-  btn.disabled=false;
+
+// Mode select (next step me gameplay load hoga)
+function selectMode(mode){
+  alert(mode==='friend'
+    ? 'Friend Mode selected.\nNext step: Full Ludo board + Pass & Play.'
+    : 'Computer Mode selected.\nNext step: Full Ludo board + AI.');
+  // NEXT STEP me yahin se gameplay start hoga
 }
 </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PT Win Arena – Ludo</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#0f2027;
+  color:white;
+  text-align:center;
+}
+.hidden{display:none}
+
+/* TOP */
+.top{
+  padding:10px;
+  background:#08151b;
+  font-size:18px;
+}
+
+/* BOARD */
+.board{
+  width:300px;
+  height:300px;
+  margin:15px auto;
+  background:#eee;
+  display:grid;
+  grid-template-columns:repeat(15,1fr);
+  grid-template-rows:repeat(15,1fr);
+  border-radius:10px;
+}
+.cell{
+  background:#ddd;
+  position:relative;
+}
+
+/* TOKENS */
+.token{
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+}
+.p1{background:#00e676}
+.p2{background:#ff5252}
+
+/* CONTROLS */
+.controls{
+  background:#122a36;
+  margin:10px;
+  padding:10px;
+  border-radius:10px;
+}
+button{
+  padding:10px 18px;
+  font-size:16px;
+  border:none;
+  border-radius:10px;
+  background:#00e676;
+  font-weight:bold;
+}
+.msg{
+  margin-top:8px;
+  min-height:40px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="top">🎲 PT Win Arena – Ludo</div>
+
+<div id="board" class="board"></div>
+
+<div class="controls">
+  <div>Dice: <span id="dice">-</span></div>
+  <button onclick="roll()">ROLL</button>
+  <div class="msg" id="msg">Player 1 turn</div>
+</div>
+
+<script>
+// ===== BASIC PATH (52 steps) =====
+const path = [...Array(52).keys()];
+
+// ===== GAME STATE =====
+let mode = "friend"; // friend or ai
+let turn = 0; // 0 = P1, 1 = P2/AI
+let dice = 0;
+
+// token positions (-1 = home)
+let p1 = [-1,-1,-1,-1];
+let p2 = [-1,-1,-1,-1];
+
+// ===== BUILD BOARD =====
+const board = document.getElementById("board");
+for(let i=0;i<225;i++){
+  const d=document.createElement("div");
+  d.className="cell";
+  board.appendChild(d);
+}
+
+// ===== DRAW TOKENS =====
+function draw(){
+  document.querySelectorAll(".token").forEach(t=>t.remove());
+
+  p1.forEach(pos=>{
+    if(pos>=0){
+      const c = board.children[path[pos]];
+      const t=document.createElement("div");
+      t.className="token p1";
+      c.appendChild(t);
+    }
+  });
+  p2.forEach(pos=>{
+    if(pos>=0){
+      const c = board.children[path[pos]];
+      const t=document.createElement("div");
+      t.className="token p2";
+      c.appendChild(t);
+    }
+  });
+}
+draw();
+
+// ===== DICE =====
+function roll(){
+  dice = Math.floor(Math.random()*6)+1;
+  document.getElementById("dice").innerText=dice;
+  move();
+}
+
+// ===== MOVE LOGIC =====
+function move(){
+  let tokens = turn===0 ? p1 : p2;
+  let opponent = turn===0 ? p2 : p1;
+
+  for(let i=0;i<4;i++){
+    if(tokens[i]===-1 && dice===6){
+      tokens[i]=0;
+      break;
+    }
+    if(tokens[i]>=0){
+      tokens[i]+=dice;
+      if(tokens[i]>51) tokens[i]=51;
+
+      // CUT
+      for(let j=0;j<4;j++){
+        if(opponent[j]===tokens[i]){
+          opponent[j]=-1;
+        }
+      }
+      break;
+    }
+  }
+
+  draw();
+
+  if(checkWin(tokens)){
+    document.getElementById("msg").innerText =
+      turn===0 ? "🎉 Player 1 Wins!" : "🎉 Player 2 Wins!";
+    return;
+  }
+
+  turn = 1-turn;
+  document.getElementById("msg").innerText =
+    turn===0 ? "Player 1 turn" : "Player 2 turn";
+}
+
+// ===== WIN =====
+function checkWin(t){
+  return t.every(x=>x===51);
+}
+</script>
+
+</body>
+</html>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PT Win Arena – Ludo</title>
+
+<style>
+body{
+  margin:0;font-family:Arial;
+  background:#0f2027;color:#fff;text-align:center;
+}
+.hidden{display:none}
+.top{padding:10px;background:#08151b;font-size:18px}
+
+/* BOARD */
+.board{
+  width:300px;height:300px;margin:10px auto;
+  background:#eee;
+  display:grid;
+  grid-template-columns:repeat(15,1fr);
+  grid-template-rows:repeat(15,1fr);
+  border-radius:12px;
+}
+.cell{background:#ddd;position:relative}
+
+/* TOKENS */
+.token{
+  width:14px;height:14px;border-radius:50%;
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  animation:pop .2s ease;
+}
+@keyframes pop{from{transform:scale(.5)}to{transform:scale(1)}}
+.p1{background:#00e676}
+.p2{background:#ff5252}
+
+/* CONTROLS */
+.controls{
+  background:#122a36;margin:10px;
+  padding:10px;border-radius:10px;
+}
+button{
+  padding:10px 18px;font-size:16px;
+  border:none;border-radius:10px;
+  background:#00e676;font-weight:bold;
+}
+.msg{margin-top:8px;min-height:40px}
+
+/* OVERLAY (WIN / LOSE) */
+.overlay{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.85);
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;font-size:26px;
+}
+.overlay span{font-size:60px}
+</style>
+</head>
+
+<body>
+
+<div class="top">🎲 PT Win Arena – Ludo</div>
+
+<div id="board" class="board"></div>
+
+<div class="controls">
+  <div>🎲 Dice: <span id="dice">-</span></div>
+  <button onclick="roll()">ROLL</button>
+  <div class="msg" id="msg">Player 1 turn</div>
+</div>
+
+<!-- WIN / LOSE OVERLAY -->
+<div id="overlay" class="overlay hidden">
+  <span id="emoji">🎉</span>
+  <div id="result">YOU WIN</div>
+</div>
+
+<!-- SOUNDS -->
+<audio id="diceSfx" src="https://assets.mixkit.co/sfx/preview/mixkit-game-dice-roll-2003.mp3"></audio>
+<audio id="winSfx" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3"></audio>
+<audio id="loseSfx" src="https://assets.mixkit.co/sfx/preview/mixkit-player-losing-or-failing-2042.mp3"></audio>
+<audio id="cutSfx" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-hit-2135.mp3"></audio>
+
+<script>
+// ===== PATH =====
+const path=[...Array(52).keys()];
+
+// ===== STATE =====
+let turn=0; // 0=P1, 1=P2
+let dice=0;
+let p1=[-1,-1,-1,-1];
+let p2=[-1,-1,-1,-1];
+
+// ===== BUILD BOARD =====
+const board=document.getElementById("board");
+for(let i=0;i<225;i++){
+  const d=document.createElement("div");
+  d.className="cell";
+  board.appendChild(d);
+}
+
+// ===== DRAW =====
+function draw(){
+  document.querySelectorAll(".token").forEach(t=>t.remove());
+  p1.forEach(pos=>{
+    if(pos>=0){
+      const c=board.children[path[pos]];
+      const t=document.createElement("div");
+      t.className="token p1"; c.appendChild(t);
+    }
+  });
+  p2.forEach(pos=>{
+    if(pos>=0){
+      const c=board.children[path[pos]];
+      const t=document.createElement("div");
+      t.className="token p2"; c.appendChild(t);
+    }
+  });
+}
+draw();
+
+// ===== DICE =====
+function roll(){
+  dice=Math.floor(Math.random()*6)+1;
+  document.getElementById("dice").innerText=dice;
+  document.getElementById("diceSfx").play();
+  move();
+}
+
+// ===== MOVE =====
+function move(){
+  let cur=turn===0?p1:p2;
+  let opp=turn===0?p2:p1;
+
+  for(let i=0;i<4;i++){
+    if(cur[i]===-1 && dice===6){
+      cur[i]=0; break;
+    }
+    if(cur[i]>=0){
+      cur[i]+=dice;
+      if(cur[i]>51)cur[i]=51;
+
+      // CUT EFFECT
+      for(let j=0;j<4;j++){
+        if(opp[j]===cur[i]){
+          opp[j]=-1;
+          document.getElementById("cutSfx").play();
+        }
+      }
+      break;
+    }
+  }
+
+  draw();
+
+  if(checkWin(cur)){
+    showResult(turn===0);
+    return;
+  }
+
+  turn=1-turn;
+  document.getElementById("msg").innerText=
+    turn===0?"Player 1 turn":"Player 2 turn";
+}
+
+// ===== WIN CHECK =====
+function checkWin(t){
+  return t.every(x=>x===51);
+}
+
+// ===== RESULT =====
+function showResult(playerWin){
+  const o=document.getElementById("overlay");
+  const e=document.getElementById("emoji");
+  const r=document.getElementById("result");
+  o.classList.remove("hidden");
+
+  if(playerWin){
+    e.innerText="🎉😄";
+    r.innerText="YOU WIN!";
+    document.getElementById("winSfx").play();
+  }else{
+    e.innerText="😞💔";
+    r.innerText="YOU LOSE";
+    document.getElementById("loseSfx").play();
+  }
+}
+</script>
+
 </body>
 </html>
