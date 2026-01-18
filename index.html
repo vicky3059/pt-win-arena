@@ -2,149 +2,133 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>PT Win Arena</title>
+<title>PT Win Arena – Ludo</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-  color: #fff;
-  overflow-x: hidden;
-}
-
-/* Header */
-.header {
-  text-align: center;
-  padding: 15px;
-  font-size: 22px;
-  font-weight: bold;
-}
-
-/* Windows */
-.window {
-  background: #1c1c1c;
-  margin: 15px;
-  padding: 15px;
-  border-radius: 12px;
-  animation: pop 0.4s ease;
-}
-
-@keyframes pop {
-  from {transform: scale(0.9); opacity: 0;}
-  to {transform: scale(1); opacity: 1;}
-}
-
-/* Buttons */
-.btn {
-  background: #00c853;
-  border: none;
-  padding: 12px 18px;
-  border-radius: 8px;
-  cursor: pointer;
-  color: #000;
-  font-weight: bold;
-  margin-top: 10px;
-  font-size: 15px;
-}
-
-.btn:active {
-  transform: scale(0.95);
-}
-
-/* Taskbar */
-.taskbar {
-  position: fixed;
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #111;
-  display: flex;
-  gap: 10px;
-  padding: 10px;
-  border-radius: 12px;
-}
-
-.icon {
-  background: #222;
-  padding: 10px 12px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-/* Hidden */
-.hidden {
-  display: none;
-}
+  body{
+    margin:0; font-family:Arial,Helvetica,sans-serif;
+    background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    color:#fff; text-align:center;
+  }
+  .wrap{max-width:420px;margin:0 auto;padding:16px}
+  h1{margin:10px 0}
+  .board{
+    background:#0b1c24;border-radius:16px;padding:16px;
+    box-shadow:0 10px 30px rgba(0,0,0,.4);
+  }
+  .row{display:flex;justify-content:space-between;align-items:center;margin:10px 0}
+  .pill{background:#122a36;padding:10px 14px;border-radius:999px}
+  .token{
+    width:22px;height:22px;border-radius:50%;
+    display:inline-block;margin-left:6px
+  }
+  .me{background:#00e676}
+  .ai{background:#ff5252}
+  .dice{
+    font-size:36px; margin:14px 0; min-height:42px
+  }
+  .btn{
+    background:#00e676;color:#000;border:none;border-radius:12px;
+    padding:14px 22px;font-weight:700;font-size:16px;cursor:pointer
+  }
+  .btn:disabled{opacity:.5}
+  .track{
+    background:#0e2430;border-radius:12px;padding:12px;margin-top:12px
+  }
+  .bar{
+    height:10px;border-radius:999px;background:#1a3a4a;overflow:hidden
+  }
+  .fill{height:100%}
+  .fill.me{background:#00e676}
+  .fill.ai{background:#ff5252}
+  .msg{min-height:40px;margin-top:10px}
+  .footer{font-size:12px;opacity:.8;margin-top:8px}
 </style>
 </head>
 
 <body>
+<div class="wrap">
+  <h1>🎲 PT Win Arena – Ludo</h1>
+  <div class="board">
+    <div class="row">
+      <div class="pill">YOU <span class="token me"></span></div>
+      <div class="pill">COMPUTER <span class="token ai"></span></div>
+    </div>
 
-<div class="header">
-  🖥️ PT Win Arena  
-  <div style="font-size:12px;font-weight:normal;">Fun simulation • No real money</div>
-</div>
+    <div class="dice" id="dice">🎲</div>
+    <button class="btn" id="rollBtn" onclick="roll()">ROLL DICE</button>
 
-<!-- Wallet -->
-<div id="wallet" class="window">
-  <h3>💰 Wallet</h3>
-  <p>Virtual Coins: <b><span id="coins">1000</span></b></p>
-  <button class="btn" onclick="earnCoins()">Earn Coins</button>
-</div>
+    <div class="track">
+      <div class="row">
+        <div>YOU: <b><span id="mePos">0</span>/100</b></div>
+        <div>AI: <b><span id="aiPos">0</span>/100</b></div>
+      </div>
+      <div class="bar"><div class="fill me" id="meBar" style="width:0%"></div></div>
+      <div style="height:8px"></div>
+      <div class="bar"><div class="fill ai" id="aiBar" style="width:0%"></div></div>
+    </div>
 
-<!-- Profiles -->
-<div id="profiles" class="window hidden">
-  <h3>👤 Fake Profiles</h3>
-  <p>🧑 Rahul_99 — 5,000,000 coins</p>
-  <p>👩 Anjali_X — 12,000,000 coins</p>
-  <p>🧔 KingPlayer — 99,999,999 coins</p>
-</div>
-
-<!-- Reward -->
-<div id="reward" class="window hidden">
-  <h3>🎉 Reward</h3>
-  <p>You won <b>1,000,000</b> coins 😜</p>
-</div>
-
-<!-- Taskbar -->
-<div class="taskbar">
-  <div class="icon" onclick="openWin('wallet')">💰 Wallet</div>
-  <div class="icon" onclick="openWin('profiles')">👤 Profiles</div>
-  <div class="icon" onclick="openWin('reward')">🎁 Reward</div>
+    <div class="msg" id="msg">Your turn. Roll the dice!</div>
+  </div>
+  <div class="footer">Single-player vs Computer • Just for fun</div>
 </div>
 
 <!-- Sounds -->
-<audio id="clickSound">
-  <source src="https://assets.mixkit.co/sfx/preview/mixkit-game-click-1114.mp3">
-</audio>
-
-<audio id="coinSound">
-  <source src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-bonus-alert-767.mp3">
-</audio>
+<audio id="rollSfx" src="https://assets.mixkit.co/sfx/preview/mixkit-game-dice-roll-2003.mp3"></audio>
+<audio id="winSfx" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3"></audio>
 
 <script>
-let coins = 1000;
+let me=0, ai=0, turn="me";
+const diceEl=document.getElementById('dice');
+const msg=document.getElementById('msg');
+const btn=document.getElementById('rollBtn');
+const mePos=document.getElementById('mePos');
+const aiPos=document.getElementById('aiPos');
+const meBar=document.getElementById('meBar');
+const aiBar=document.getElementById('aiBar');
+const rollSfx=document.getElementById('rollSfx');
+const winSfx=document.getElementById('winSfx');
 
-function play(id){
-  document.getElementById(id).currentTime = 0;
-  document.getElementById(id).play();
+function rand(){return Math.floor(Math.random()*6)+1}
+function setBars(){
+  mePos.textContent=me; aiPos.textContent=ai;
+  meBar.style.width=Math.min(me,100)+'%';
+  aiBar.style.width=Math.min(ai,100)+'%';
 }
-
-function openWin(id){
-  play("clickSound");
-  document.querySelectorAll('.window').forEach(w => w.classList.add("hidden"));
-  document.getElementById(id).classList.remove("hidden");
+function end(who){
+  winSfx.play();
+  btn.disabled=true;
+  msg.innerHTML = who==="me" ? "🎉 You WIN!" : "🤖 Computer wins!";
 }
+function roll(){
+  if(btn.disabled) return;
+  btn.disabled=true;
+  rollSfx.currentTime=0; rollSfx.play();
+  const d=rand();
+  diceEl.textContent = ["⚀","⚁","⚂","⚃","⚄","⚅"][d-1];
 
-function earnCoins(){
-  play("coinSound");
-  coins += 500;
-  document.getElementById("coins").innerText = coins;
+  setTimeout(()=>{
+    if(turn==="me"){
+      me = Math.min(100, me + d);
+      setBars();
+      if(me>=100) return end("me");
+      turn="ai";
+      msg.textContent="Computer thinking…";
+      setTimeout(aiTurn,700);
+    }
+  },400);
+}
+function aiTurn(){
+  const d=rand();
+  diceEl.textContent = ["⚀","⚁","⚂","⚃","⚄","⚅"][d-1];
+  ai = Math.min(100, ai + d);
+  setBars();
+  if(ai>=100) return end("ai");
+  turn="me";
+  msg.textContent="Your turn. Roll the dice!";
+  btn.disabled=false;
 }
 </script>
-
 </body>
 </html>
