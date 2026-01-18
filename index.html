@@ -1,63 +1,150 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>PT Win Arena</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-      color: white;
-    }
-    .taskbar {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      background: #111;
-      padding: 8px;
-      display: flex;
-      justify-content: space-around;
-    }
-    .icon {
-      background: #222;
-      padding: 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-    .window {
-      background: #1c1c1c;
-      margin: 20px;
-      padding: 15px;
-      border-radius: 10px;
-      display: none;
-    }
-    .btn {
-      background: #00c853;
-      border: none;
-      padding: 10px 15px;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-top: 10px;
-      font-weight: bold;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>PT Win Arena</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  color: #fff;
+  overflow-x: hidden;
+}
+
+/* Header */
+.header {
+  text-align: center;
+  padding: 15px;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+/* Windows */
+.window {
+  background: #1c1c1c;
+  margin: 15px;
+  padding: 15px;
+  border-radius: 12px;
+  animation: pop 0.4s ease;
+}
+
+@keyframes pop {
+  from {transform: scale(0.9); opacity: 0;}
+  to {transform: scale(1); opacity: 1;}
+}
+
+/* Buttons */
+.btn {
+  background: #00c853;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #000;
+  font-weight: bold;
+  margin-top: 10px;
+  font-size: 15px;
+}
+
+.btn:active {
+  transform: scale(0.95);
+}
+
+/* Taskbar */
+.taskbar {
+  position: fixed;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #111;
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 12px;
+}
+
+.icon {
+  background: #222;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* Hidden */
+.hidden {
+  display: none;
+}
+</style>
 </head>
 
 <body>
 
-<h2 style="text-align:center;margin-top:20px;">🖥️ PT Win Arena</h2>
-<p style="text-align:center;font-size:12px;">Fun simulation game • No real money</p>
-
-<div id="wallet" class="window">
-  <h3>💰 Wallet</h3>
-  <p>Virtual Coins: <span id="coins">1000</span></p>
-  <button class="btn" onclick="earn()">Earn Coins</button>
+<div class="header">
+  🖥️ PT Win Arena  
+  <div style="font-size:12px;font-weight:normal;">Fun simulation • No real money</div>
 </div>
 
-<div id="profiles" class="window">
+<!-- Wallet -->
+<div id="wallet" class="window">
+  <h3>💰 Wallet</h3>
+  <p>Virtual Coins: <b><span id="coins">1000</span></b></p>
+  <button class="btn" onclick="earnCoins()">Earn Coins</button>
+</div>
+
+<!-- Profiles -->
+<div id="profiles" class="window hidden">
   <h3>👤 Fake Profiles</h3>
-  <p>🧑 Rahul_99 – Balance: 5,000,000</p>
-  <p>👩 Anjali_X – Balance: 12,000,000</p>
-  <p>🧔 KingPlayer – Balance: 99
+  <p>🧑 Rahul_99 — 5,000,000 coins</p>
+  <p>👩 Anjali_X — 12,000,000 coins</p>
+  <p>🧔 KingPlayer — 99,999,999 coins</p>
+</div>
+
+<!-- Reward -->
+<div id="reward" class="window hidden">
+  <h3>🎉 Reward</h3>
+  <p>You won <b>1,000,000</b> coins 😜</p>
+</div>
+
+<!-- Taskbar -->
+<div class="taskbar">
+  <div class="icon" onclick="openWin('wallet')">💰 Wallet</div>
+  <div class="icon" onclick="openWin('profiles')">👤 Profiles</div>
+  <div class="icon" onclick="openWin('reward')">🎁 Reward</div>
+</div>
+
+<!-- Sounds -->
+<audio id="clickSound">
+  <source src="https://assets.mixkit.co/sfx/preview/mixkit-game-click-1114.mp3">
+</audio>
+
+<audio id="coinSound">
+  <source src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-bonus-alert-767.mp3">
+</audio>
+
+<script>
+let coins = 1000;
+
+function play(id){
+  document.getElementById(id).currentTime = 0;
+  document.getElementById(id).play();
+}
+
+function openWin(id){
+  play("clickSound");
+  document.querySelectorAll('.window').forEach(w => w.classList.add("hidden"));
+  document.getElementById(id).classList.remove("hidden");
+}
+
+function earnCoins(){
+  play("coinSound");
+  coins += 500;
+  document.getElementById("coins").innerText = coins;
+}
+</script>
+
+</body>
+</html>
